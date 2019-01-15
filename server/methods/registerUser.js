@@ -30,6 +30,7 @@ Meteor.methods({
 				email: String,
 				pass: String,
 				name: String,
+				mood: String,
 				secretURL: Match.Optional(String),
 				reason: Match.Optional(String),
 			}));
@@ -50,6 +51,7 @@ Meteor.methods({
 			password: formData.pass,
 			name: formData.name,
 			reason: formData.reason,
+			mood: formData.mood,
 		};
 
 		// Check if user has already been imported and never logged in. If so, set password and let it through
@@ -62,7 +64,7 @@ Meteor.methods({
 			userId = Accounts.createUser(userData);
 		}
 
-		RocketChat.models.Users.setName(userId, s.trim(formData.name));
+		RocketChat.models.Users.setNameAndMood(userId, { name: s.trim(formData.name), mood: formData.mood });
 
 		const reason = s.trim(formData.reason);
 		if (manuallyApproveNewUsers && reason) {

@@ -12,6 +12,7 @@ Meteor.publish('userData', function() {
 			status: 1,
 			statusDefault: 1,
 			statusConnection: 1,
+			mood: 1,
 			avatarOrigin: 1,
 			utcOffset: 1,
 			language: 1,

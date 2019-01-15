@@ -11,6 +11,18 @@ const setStatus = (status) => {
 	popover.close();
 };
 
+const setMood = (mood) => {
+	const _id = Meteor.userId();
+
+	Meteor.users.update({ _id }, {
+		$set: {
+			mood,
+		},
+	});
+
+	popover.close();
+};
+
 const viewModeIcon = {
 	extended: 'th-list',
 	medium: 'list',
@@ -244,7 +256,7 @@ Template.sidebarHeader.helpers({
 			};
 		}
 		return id && Meteor.users.findOne(id, { fields: {
-			username: 1, status: 1,
+			username: 1, status: 1, mood: 1,
 		} });
 	},
 	toolbarButtons() {
@@ -261,6 +273,80 @@ Template.sidebarHeader.events({
 			e.currentTarget.blur();
 		}
 		return this.action && this.action.apply(this, [e]);
+	},
+	async 'click .sidebar__header-mood'(e) {
+
+		const moodStatistic = await new Promise((res, rej) => {
+			Meteor.call('getMoodStatistic', (err, statistic) => {
+				if (err) {
+					rej(err);
+				}
+				res(statistic.reduce((acc, user) => {
+					acc[user._id] = user.count;
+					return acc;
+				}, {}));
+			});
+		});
+
+		const config = {
+			popoverClass: 'sidebar-header',
+			columns: [
+				{
+					groups: [
+						{
+							title: t('User mood'),
+							items: [
+								{
+									icon: 'happy',
+									name: t('Happy'),
+									action: () => setMood('happy'),
+								},
+								{
+									icon: 'sad',
+									name: t('Sad'),
+									action: () => setMood('sad'),
+								},
+								{
+									icon: 'uncertain',
+									name: t('Uncertain'),
+									action: () => setMood('uncertain'),
+								},
+								{
+									icon: 'confused',
+									name: t('Confused'),
+									action: () => setMood('confused'),
+								},
+							],
+						},
+						{
+							title: t('Mood statistic'),
+							items: [
+								{
+									icon: 'happy',
+									name: t(`${ moodStatistic.happy || 0 }`),
+								},
+								{
+									icon: 'sad',
+									name: t(`${ moodStatistic.sad || 0 }`),
+								},
+								{
+									icon: 'uncertain',
+									name: t(`${ moodStatistic.uncertain || 0 }`),
+								},
+								{
+									icon: 'confused',
+									name: t(`${ moodStatistic.confused || 0 }`),
+								},
+							],
+						},
+					],
+				},
+			],
+			currentTarget: e.currentTarget,
+			offsetVertical: e.currentTarget.clientHeight + 10,
+		};
+
+		popover.open(config);
 	},
 	'click .sidebar__header .avatar'(e) {
 		if (!(Meteor.userId() == null && RocketChat.settings.get('Accounts_AllowAnonymousRead'))) {
