@@ -109,6 +109,7 @@ Template.loginForm.events({
 			}
 			if (state === 'register') {
 				formData.secretURL = FlowRouter.getParam('hash');
+				formData.mood = 'uncertain';
 				return Meteor.call('registerUser', formData, function(error) {
 					instance.loading.set(false);
 					if (error != null) {

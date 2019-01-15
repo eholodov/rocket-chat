@@ -1,6 +1,9 @@
 <template name="sidebarHeader">
 	<header class="sidebar__header">
 		{{#with myUserInfo}}
+			<div class="sidebar__header-mood">
+				{{> mood mood=mood}}
+			</div>
 			<div class="sidebar__header-thumb">
 				{{> avatar username=username}}
 				<div class="sidebar__header-status-bullet sidebar__header-status-bullet--{{status}}"></div>

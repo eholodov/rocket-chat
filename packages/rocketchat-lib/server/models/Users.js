@@ -3,6 +3,22 @@ import { Accounts } from 'meteor/accounts-base';
 import _ from 'underscore';
 import s from 'underscore.string';
 
+Meteor.users.allow({
+	update() {
+		return true;
+	},
+});
+
+Meteor.methods({
+	async getMoodStatistic() {
+		return await RocketChat.models.Users.model.rawCollection().aggregate(
+			[
+				{ $group: { _id: '$mood', count: { $sum: 1 } } },
+			]
+		).toArray();
+	},
+});
+
 class ModelUsers extends RocketChat.models._Base {
 	constructor(...args) {
 		super(...args);
@@ -368,6 +384,17 @@ class ModelUsers extends RocketChat.models._Base {
 		return this.update(_id, update);
 	}
 
+	setNameAndMood(_id, { mood, name }) {
+		const update = {
+			$set: {
+				mood,
+				name,
+			},
+		};
+
+		return this.update(_id, update);
+	}
+
 	setCustomFields(_id, fields) {
 		const values = {};
 		Object.keys(fields).forEach((key) => {
@@ -417,6 +444,15 @@ class ModelUsers extends RocketChat.models._Base {
 			},
 		};
 
+		return this.update({}, update, { multi: true });
+	}
+
+	setAllUsersMood(mood) {
+		const update = {
+			$set: {
+				mood,
+			},
+		};
 		return this.update({}, update, { multi: true });
 	}
 
